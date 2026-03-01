@@ -1,5 +1,5 @@
 const express = require("express");
-const OpenAI = require("openai");
+const Groq = require("groq-sdk");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -12,7 +12,7 @@ app.get("/", (req, res) => {
   <!DOCTYPE html>
   <html>
   <head>
-    <title>AI App Live</title>
+    <title>AI App Live (Groq)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <style>
       body {
@@ -77,7 +77,7 @@ app.get("/", (req, res) => {
     </style>
   </head>
   <body>
-    <header>AI App Live</header>
+    <header>AI App Live (Groq)</header>
     <div id="chat"></div>
     <div id="inputArea">
       <input id="messageInput" placeholder="Type your message..." />
@@ -111,9 +111,8 @@ app.get("/", (req, res) => {
 
           const data = await response.json();
           addMessage(data.reply, "bot");
-
         } catch (err) {
-          addMessage("Frontend Error: " + err.message, "bot");
+          addMessage("Error: " + err.message, "bot");
         }
       }
     </script>
@@ -122,32 +121,32 @@ app.get("/", (req, res) => {
   `);
 });
 
-// Chat API
+// Chat route
 app.post("/chat", async (req, res) => {
   try {
-    if (!process.env.OPENAI_API_KEY) {
+    if (!process.env.GROQ_API_KEY) {
       return res.json({
-        reply: "OPENAI_API_KEY missing in Render Environment Variables"
+        reply: "GROQ_API_KEY missing in Render environment variables"
       });
     }
 
-    const client = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
+    const groq = new Groq({
+      apiKey: process.env.GROQ_API_KEY,
     });
 
-    const response = await client.chat.completions.create({
-      model: "gpt-4o",
+    const completion = await groq.chat.completions.create({
       messages: [
         { role: "user", content: req.body.message }
       ],
+      model: "llama3-8b-8192",
     });
 
     res.json({
-      reply: response.choices[0].message.content,
+      reply: completion.choices[0].message.content,
     });
 
   } catch (error) {
-    console.error("REAL ERROR:", error);
+    console.error("Groq Error:", error);
     res.status(500).json({
       reply: error.message
     });
