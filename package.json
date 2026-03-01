@@ -1,7 +1,6 @@
 {
   "name": "ai-app-live",
   "version": "1.0.0",
-  "description": "AI Chat App",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
